@@ -10,6 +10,8 @@ Clone the repository and install the dependencies:
   git clone
 ```
 
+Then cd into the project directory and install the dependencies:
+
 ```bash
   npm install
 ```
