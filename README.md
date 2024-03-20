@@ -8,7 +8,14 @@ Clone the repository and install the dependencies:
 
 ```bash
   git clone
-  cd react-web3-starter
+```
+
+```bash
   npm install
+```
+
+## To run the project
+
+```bash
   npm run dev
 ```
