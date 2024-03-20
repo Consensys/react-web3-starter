@@ -1,5 +1,5 @@
 {
-  "name": "vite-web3-starter",
+  "name": "@consensys/react-web3-starter",
   "private": true,
   "version": "0.0.0",
   "type": "module",
