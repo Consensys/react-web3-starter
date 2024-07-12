@@ -1,27 +1,73 @@
-import { useAccount, useConnect, useDisconnect } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { useState } from "react";
+import { useChainId, useConnect, useDisconnect, useAccount } from "wagmi";
 
-export const ConnectWalletButton = () => {
-  const { connect } = useConnect();
-  const { disconnect } = useDisconnect();
-  const { isConnected } = useAccount();
+export function ConnectWalletButton() {
+  const chainId = useChainId();
+  const { disconnect, isPending: isDisconnecting } = useDisconnect();
+  const {
+    connectors,
+    connect,
+    isPending: isConnecting,
+    error: connectError,
+  } = useConnect();
+  const { address, isConnected } = useAccount();
+  const [error, setError] = useState<string | null>(null);
 
-  const handleConnect = () => {
-    if (isConnected) {
+  const handleDisconnect = async () => {
+    try {
+      setError(null);
       disconnect();
-      return;
+    } catch (err) {
+      setError("Failed to disconnect");
     }
-    const connector = injected({ target: "metaMask" });
-
-    connect({ connector });
   };
 
   return (
-    <button
-      onClick={handleConnect}
-      className="bg-gray-800 font-sans text-white font-medium py-2 px-4 rounded hover:bg-opacity-80 duration-200 hover:shadow-xl"
-    >
-      {isConnected ? "Disconnect" : "Connect Wallet"}
-    </button>
+    <div className="flex flex-col items-center p-4">
+      {isConnected ? (
+        <div className="flex gap-4 items-center">
+          <div className="w-40 truncate" title={address}>
+            {address}
+          </div>
+          <button
+            className={`bg-red-800 text-red-100 px-4 py-2 rounded-md shadow-md duration-150 ${
+              isDisconnecting
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-opacity-80 hover:shadow-lg"
+            }`}
+            onClick={handleDisconnect}
+            type="button"
+            disabled={isDisconnecting}
+          >
+            {isDisconnecting ? "Disconnecting..." : "Disconnect"}
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          {connectors.map((connector) => (
+            <button
+              key={connector.id}
+              onClick={() => connect({ connector, chainId })}
+              type="button"
+              className={`bg-gray-800 text-white px-4 py-2 rounded-md mt-2 ${
+                isConnecting
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-opacity-80"
+              }`}
+              disabled={isConnecting}
+            >
+              {isConnecting
+                ? "Connecting..."
+                : `Connect with ${connector.name}`}
+            </button>
+          ))}
+        </div>
+      )}
+      {(error || connectError) && (
+        <div className="text-red-500 mt-2">
+          {error || connectError?.message}
+        </div>
+      )}
+    </div>
   );
-};
+}
